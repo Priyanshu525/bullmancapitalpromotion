@@ -3,14 +3,13 @@ import random
 import time
 import pytz
 from datetime import datetime
-import schedule
 
 # === Required Settings ===
 BOT_TOKEN = '7788331565:AAHCEOlBuYIYT-rgqiWkdrr-llr30V9-yDw'
-CHANNEL_ID = '-1002167505208'  # Replace with your private channel's numeric ID
+CHANNEL_ID = '-1002167505208'  # Replace with your channel ID
 
-# === Random Messages List ===
-messages = [
+# === Promotion Messages ===
+promotion_messages = [
     """⚠️💣 LIMITED SPOTS for Bullman Capital’s Personal Trades!
 💸 Trades that actually make money – shared in REAL-TIME!
 👉 Don’t wait – you’re missing pips every second
@@ -56,19 +55,29 @@ Bullman Capital's Personal Trades = 🔥🔥🔥
 👉 https://pric.app/_Pv7r
 📩 Send payment screenshot to @TeamBullmanCapital & GET IN!""",
 
-""" 🚀📈 Trade Like a Beast with Bullman Capital!
+    """🚀📈 Trade Like a Beast with Bullman Capital!
 💹 We drop REAL setups – not useless signals
 🎯 Clean charts, sniper entries, daily updates
 🔗 https://pric.app/_Pv7r
 📤 DM payment slip to @TeamBullmanCapital NOW!"""
 ]
 
-# === Fixed 9AM Message (Mon–Fri) ===
-morning_msg = """📈 Good morning traders! Start your day with Bullman Capital’s expert insights.
-Let’s dominate the market together. 💪"""
+# === Load Morning Messages from File ===
+def load_morning_messages(filename):
+    with open(filename, "r", encoding="utf-8") as f:
+        return [line.strip() for line in f if line.strip()]
+
+morning_messages = load_morning_messages("Good_Morning_Traders_Messages.txt")
 
 # === Timezone (IST) ===
 IST = pytz.timezone('Asia/Kolkata')
+
+# === Fixed Sending Times (24-hr format)
+fixed_send_times = ['10:00', '13:00', '16:00', '19:00', '22:00']
+morning_time = '09:00'
+
+# === Track Last Sent Times Per Day ===
+last_sent_times = {}
 
 # === Send Message Function ===
 def send_message(text):
@@ -79,44 +88,31 @@ def send_message(text):
         'parse_mode': 'HTML'
     }
     response = requests.post(url, data=data)
-    print(f"[{datetime.now(IST).strftime('%H:%M:%S')}] Sent message. Status: {response.status_code}")
+    status = response.status_code
+    print(f"[{datetime.now(IST).strftime('%H:%M:%S')}] Sent message. Status: {status}")
 
-# === Message Senders ===
-def send_random_msg():
+# === Main Bot Loop ===
+print("🚀 Bot started... waiting for fixed time windows.")
+
+while True:
     now = datetime.now(IST)
-    if 10 <= now.hour <= 23:
-        msg = random.choice(messages)
-        send_message(msg)
+    current_time = now.strftime('%H:%M')
+    today = now.strftime('%Y-%m-%d')
 
-def send_morning_msg():
-    now = datetime.now(IST)
-    if now.weekday() < 5:  # Monday–Friday
-        send_message(morning_msg)
+    # === Morning Message (Mon–Fri only)
+    if now.weekday() < 5 and current_time == morning_time:
+        key = f"{today}-morning"
+        if not last_sent_times.get(key):
+            msg = random.choice(morning_messages)
+            send_message(msg)
+            last_sent_times[key] = True
 
-# === Random Scheduling ===
-def schedule_random_times():
-    hour = 10
-    while hour <= 23:
-        minute = random.randint(0, 59)
-        t = f"{hour:02d}:{minute:02d}"
-        schedule.every().day.at(t).do(send_random_msg)
-        print(f"Scheduled random message at {t}")
-        hour += random.choice([3, 4])
+    # === Promotional Messages at 3hr intervals
+    for send_time in fixed_send_times:
+        key = f"{today}-{send_time}"
+        if current_time == send_time and not last_sent_times.get(key):
+            msg = random.choice(promotion_messages)
+            send_message(msg)
+            last_sent_times[key] = True
 
-# === Start Logic ===
-if __name__ == "__main__":
-    # Send an immediate message on start
-    print("Sending immediate message on startup...")
-    send_random_msg()
-
-    # Schedule morning message
-    schedule.every().day.at("09:00").do(send_morning_msg)
-
-    # Schedule daily random messages
-    schedule_random_times()
-
-    # Main loop
-    print("Bot started and running...")
-    while True:
-        schedule.run_pending()
-        time.sleep(10)
+    time.sleep(30)
