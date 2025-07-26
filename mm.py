@@ -92,7 +92,7 @@ def send_message(text):
     print(f"[{datetime.now(IST).strftime('%H:%M:%S')}] Sent message. Status: {status}")
 
 # === Main Bot Loop ===
-print("🚀 Bot started... waiting for fixed time windows.")
+print("Bot started... waiting for fixed time windows.")
 
 while True:
     now = datetime.now(IST)
