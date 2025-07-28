@@ -73,7 +73,7 @@ morning_messages = load_morning_messages("Good_Morning_Traders_Messages.txt")
 IST = pytz.timezone('Asia/Kolkata')
 
 # === Fixed Sending Times (24-hr format)
-fixed_send_times = ['10:00', '13:00', '16:00', '19:00', '22:00']
+fixed_send_times = ['10:00', '13:00', '16:00', '19:00', '22:00', '23:30']
 morning_time = '09:00'
 
 # === Track Last Sent Times Per Day ===
