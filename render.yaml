@@ -3,5 +3,5 @@ services:
     name: bullman-telegram-bot
     runtime: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python main.py"
+    startCommand: "python mm.py"
     region: oregon
