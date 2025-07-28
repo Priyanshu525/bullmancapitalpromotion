@@ -78,6 +78,7 @@ morning_time = '09:00'
 
 # === Track Last Sent Times Per Day ===
 last_sent_times = {}
+print("Current time is:", now.strftime("%H:%M:%S"))
 
 # === Send Message Function ===
 def send_message(text):
